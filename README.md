@@ -1,6 +1,6 @@
 # terraform-aws-wordpress-ecs
 
-Wordpress on AWS using ECS Fargate
+Terraform module which deploys Wordpress on AWS using ECS Fargate for compute, RDS for database and an application load balancer.
 
 ## Example Usage
 

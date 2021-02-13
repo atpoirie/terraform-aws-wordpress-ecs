@@ -12,6 +12,10 @@
         "protocol": "tcp"
       }
     ],
+    "secrets": [{
+      "name": "WORDPRESS_DB_PASSWORD",
+      "valueFrom": "arn:aws:secretsmanager:${aws_region}:${aws_account_id}:secret:${secret_name}:WORDPRESS_DB_PASSWORD::"
+    }],
     "environment": [
       {
         "name": "WORDPRESS_DB_HOST",
@@ -22,10 +26,6 @@
         "value": "${wordpress_db_user}"
       },
       {
-        "name": "WORDPRESS_DB_PASSWORD",
-        "value": "${wordpress_db_pass}"
-      },
-      {
         "name": "WORDPRESS_DB_NAME",
         "value": "wordpress"
       }
@@ -34,8 +34,9 @@
       "logDriver": "awslogs",
       "options": { 
         "awslogs-group" : "/ecs/wordpress",
-        "awslogs-region": "us-east-1",
-        "awslogs-stream-prefix": "wordpress"
+        "awslogs-region": "${aws_region}",
+        "awslogs-stream-prefix": "wordpress",
+        "awslogs-create-group": "true"
       }
     }
   }
