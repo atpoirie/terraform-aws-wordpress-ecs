@@ -6,10 +6,6 @@
       {
         "containerPort": 80,
         "protocol": "tcp"
-      },
-      {
-        "containerPort": 443,
-        "protocol": "tcp"
       }
     ],
     "secrets": [{
@@ -27,17 +23,28 @@
       },
       {
         "name": "WORDPRESS_DB_NAME",
-        "value": "wordpress"
+        "value": "${wordpress_db_name}"
       }
     ],
     "logConfiguration": { 
       "logDriver": "awslogs",
       "options": { 
-        "awslogs-group" : "/ecs/wordpress",
+        "awslogs-group" : "${cloudwatch_log_group}",
         "awslogs-region": "${aws_region}",
-        "awslogs-stream-prefix": "wordpress",
-        "awslogs-create-group": "true"
+        "awslogs-stream-prefix": "wordpress"
       }
-    }
+    }, 
+    "mountPoints": [
+      {
+        "readOnly": false,
+        "containerPath": "/var/www/html/wp-content/themes",
+        "sourceVolume": "efs-themes"
+      },
+      {
+        "readOnly": false,
+        "containerPath": "/var/www/html/wp-content/plugins",
+        "sourceVolume": "efs-plugins"
+      }
+    ]
   }
 ]

@@ -1,7 +1,7 @@
-variable "ecs_cloudwatch_logs_group" {
+variable "ecs_cloudwatch_logs_group_name" {
   description = "Name of the Log Group where ECS logs should be written"
   type        = string
-  default     = "ecs/wordpress"
+  default     = "/ecs/wordpress"
 }
 
 variable "ecs_cluster_name" {
@@ -63,6 +63,12 @@ variable "ecs_task_definition_memory" {
   default     = "2048"
 }
 
+variable "efs_service_security_group_ids" {
+  description = "Security groups to assign to the EFS mount target"
+  type        = list(string)
+  default     = []
+}
+
 variable "lb_name" {
   description = "Name for the load balancer"
   type        = string
@@ -73,6 +79,24 @@ variable "lb_internal" {
   description = "If the load balancer should be an internal load balancer"
   type        = bool
   default     = false
+}
+
+varialbe "lb_listener_enable_ssl" {
+  description = "Enable the SSL listener, if this is set the lb_listener_certificate_arn must also be provided"
+  type        = bool
+  default     = false
+}
+
+variable "lb_listener_certificate_arn" {
+  description = "The ACM certificate ARN to use on the HTTPS listener"
+  type        = string
+  default     = ""
+}
+
+variable "lb_listener_ssl_policy" {
+  description = "The SSL policy to apply to the HTTPS listener"
+  type        = string
+  default     = "ELBSecurityPolicy-FS-1-2-Res-2019-08"
 }
 
 variable "lb_security_group_ids" {
@@ -136,8 +160,8 @@ variable "rds_cluster_deletion_protection" {
 
 variable "rds_cluster_enable_cloudwatch_logs_export" {
   description = "Set of log types to export to cloudwatch, valid values are audit, error, general, slowquery, postgresql"
-  type        = string
-  default     = "audit"
+  type        = list(string)
+  default     = ["audit"]
 }
 
 variable "rds_cluster_engine_version" {
@@ -146,7 +170,7 @@ variable "rds_cluster_engine_version" {
   default     = ""
 }
 
-variable "aws_rds_cluster_master_username" {
+variable "rds_cluster_master_username" {
   description = "Master username for the RDS cluster"
   type        = string
   default     = "admin"
@@ -157,10 +181,28 @@ variable "rds_cluster_security_group_ids" {
   default     = []
 }
 
+variable "rds_cluster_preferred_backup_window" {
+  description = "The daily time range during which automated backups are created if automated backups are enabled using the BackupRetentionPeriod parameter.  Time in UTC."
+  type        = string
+  default     = "08:00-09:00"
+}
+
+variable "rds_cluster_preferred_maintenance_window" {
+  description = "The weekly time range during which system maintenance can occur, in (UTC)."
+  type        = string
+  default     = "sun:06:00-sun:07:00"
+}
+
 variable "rds_cluster_skip_final_snapshot" {
   description = "Determines whether a final DB snapshot is created before the DB cluster is deleted"
   type        = bool
   default     = true
+}
+
+variable "rds_cluster_instance_count" {
+  description = "Number of RDS instances to provision"
+  type        = number
+  default     = 2
 }
 
 variable "rds_cluster_instance_instance_class" {
@@ -184,6 +226,7 @@ variable "tags" {
 locals {
   rds_cluster_engine_version     = var.rds_cluster_engine_version == "" ? data.aws_rds_engine_version.rds_engine_version.version : var.rds_cluster_engine_version
   db_subnet_group_name           = var.db_subnet_group_name == "" ? aws_db_subnet_group.db[0].name : var.db_subnet_group_name
+  efs_service_security_group_ids = length(var.efs_service_security_group_ids) == 0 ? aws_security_group.efs_service.*.id : var.efs_service_security_group_ids
   ecs_service_security_group_ids = length(var.ecs_service_security_group_ids) == 0 ? aws_security_group.ecs_service.*.id : var.ecs_service_security_group_ids
   lb_security_group_ids          = length(var.lb_security_group_ids) == 0 ? aws_security_group.lb_service.*.id : var.lb_security_group_ids
   rds_cluster_security_group_ids = length(var.rds_cluster_security_group_ids) == 0 ? aws_security_group.rds_cluster.*.id : var.rds_cluster_security_group_ids

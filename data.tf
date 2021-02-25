@@ -1,16 +1,3 @@
-data "template_file" "wordpress" {
-  template = "${file("${path.module}/wordpress.tpl")}"
-  vars = {
-    ecs_service_container_name = var.ecs_service_container_name
-    wordpress_db_host          = aws_rds_cluster.wordpress.endpoint
-    wordpress_db_user          = var.aws_rds_cluster_master_username
-    aws_region                 = data.aws_region.current.name
-    aws_logs_group             = var.ecs_cloudwatch_logs_group
-    aws_account_id             = data.aws_caller_identity.current.account_id
-    secret_name                = aws_secretsmanager_secret.wordpress.name
-  }
-}
-
 data "aws_rds_engine_version" "rds_engine_version" {
   engine = "aurora-mysql"
 }
@@ -22,3 +9,36 @@ data "aws_subnet" "ecs_service_subnet_ids" {
 data "aws_region" "current" {}
 
 data "aws_caller_identity" "current" {}
+
+data "aws_iam_policy_document" "kms" {
+  statement {
+    sid    = "Enable IAM User Permissions"
+    effect = "Allow"
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
+    }
+    actions   = ["kms:*"]
+    resources = ["*"]
+  }
+  statement {
+    effect = "Allow"
+    principals {
+      type        = "Service"
+      identifiers = ["logs.${data.aws_region.current.name}.amazonaws.com"]
+    }
+    actions = [
+      "kms:Encrypt*",
+      "kms:Decrypt*",
+      "kms:ReEncrypt*",
+      "kms:GenerateDataKey*",
+      "kms:Describe*"
+    ]
+    resources = ["*"]
+    condition {
+      test     = "ArnLike"
+      variable = "kms:EncryptionContext:aws:logs:arn"
+      values   = ["arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:*"]
+    }
+  }
+}
