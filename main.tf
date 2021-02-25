@@ -127,6 +127,7 @@ resource "aws_ecs_service" "wordpress" {
   desired_count    = var.ecs_service_desired_count
   launch_type      = "FARGATE"
   platform_version = "1.4.0"
+  propagate_tags   = "SERVICE"
   network_configuration {
     subnets          = var.ecs_service_subnet_ids
     security_groups  = local.ecs_service_security_group_ids

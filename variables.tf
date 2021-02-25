@@ -81,7 +81,7 @@ variable "lb_internal" {
   default     = false
 }
 
-varialbe "lb_listener_enable_ssl" {
+variable "lb_listener_enable_ssl" {
   description = "Enable the SSL listener, if this is set the lb_listener_certificate_arn must also be provided"
   type        = bool
   default     = false
