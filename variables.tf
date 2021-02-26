@@ -33,11 +33,11 @@ variable "ecs_service_subnet_ids" {
   type        = list(string)
 }
 
-variable "ecs_service_security_group_ids" {
-  description = "Security groups assigned to the task ENIs"
-  type        = list(string)
-  default     = []
-}
+# variable "ecs_service_security_group_ids" {
+#   description = "Security groups assigned to the task ENIs"
+#   type        = list(string)
+#   default     = []
+# }
 
 variable "ecs_service_assign_public_ip" {
   description = "Whether to assign a public IP to the task ENIs"
@@ -63,11 +63,11 @@ variable "ecs_task_definition_memory" {
   default     = "2048"
 }
 
-variable "efs_service_security_group_ids" {
-  description = "Security groups to assign to the EFS mount target"
-  type        = list(string)
-  default     = []
-}
+# variable "efs_service_security_group_ids" {
+#   description = "Security groups to assign to the EFS mount target"
+#   type        = list(string)
+#   default     = []
+# }
 
 variable "lb_name" {
   description = "Name for the load balancer"
@@ -99,11 +99,11 @@ variable "lb_listener_ssl_policy" {
   default     = "ELBSecurityPolicy-FS-1-2-Res-2019-08"
 }
 
-variable "lb_security_group_ids" {
-  description = "Security groups to assign to the load balancer"
-  type        = list(string)
-  default     = []
-}
+# variable "lb_security_group_ids" {
+#   description = "Security groups to assign to the load balancer"
+#   type        = list(string)
+#   default     = []
+# }
 
 variable "lb_subnet_ids" {
   description = "Subnets where load balancer should be created"
@@ -175,11 +175,12 @@ variable "rds_cluster_master_username" {
   type        = string
   default     = "admin"
 }
-variable "rds_cluster_security_group_ids" {
-  description = "Security groups to assign to the RDS instances"
-  type        = list(string)
-  default     = []
-}
+
+# variable "rds_cluster_security_group_ids" {
+#   description = "Security groups to assign to the RDS instances"
+#   type        = list(string)
+#   default     = []
+# }
 
 variable "rds_cluster_preferred_backup_window" {
   description = "The daily time range during which automated backups are created if automated backups are enabled using the BackupRetentionPeriod parameter.  Time in UTC."
@@ -217,6 +218,17 @@ variable "secrets_manager_name" {
   default     = "wordpress"
 }
 
+variable "security_group_ids" {
+  description = "Map of security group id(s) for each service to replace default security groups.  Must provide a definition for all."
+  type        = map(list(string))
+  default = {
+    efs = []
+    ecs = []
+    lb  = []
+    rds = []
+  }
+}
+
 variable "tags" {
   description = "Map of tags to provide to the resources created"
   type        = map(string)
@@ -226,8 +238,8 @@ variable "tags" {
 locals {
   rds_cluster_engine_version     = var.rds_cluster_engine_version == "" ? data.aws_rds_engine_version.rds_engine_version.version : var.rds_cluster_engine_version
   db_subnet_group_name           = var.db_subnet_group_name == "" ? aws_db_subnet_group.db[0].name : var.db_subnet_group_name
-  efs_service_security_group_ids = length(var.efs_service_security_group_ids) == 0 ? aws_security_group.efs_service.*.id : var.efs_service_security_group_ids
-  ecs_service_security_group_ids = length(var.ecs_service_security_group_ids) == 0 ? aws_security_group.ecs_service.*.id : var.ecs_service_security_group_ids
-  lb_security_group_ids          = length(var.lb_security_group_ids) == 0 ? aws_security_group.lb_service.*.id : var.lb_security_group_ids
-  rds_cluster_security_group_ids = length(var.rds_cluster_security_group_ids) == 0 ? aws_security_group.rds_cluster.*.id : var.rds_cluster_security_group_ids
+  efs_service_security_group_ids = length(var.security_group_ids.efs) == 0 ? aws_security_group.efs_service.*.id : var.security_group_ids.efs
+  ecs_service_security_group_ids = length(var.security_group_ids.ecs) == 0 ? aws_security_group.ecs_service.*.id : var.security_group_ids.ecs
+  lb_security_group_ids          = length(var.security_group_ids.lb) == 0 ? aws_security_group.lb_service.*.id : var.security_group_ids.lb
+  rds_cluster_security_group_ids = length(var.security_group_ids.rds) == 0 ? aws_security_group.rds_cluster.*.id : var.security_group_ids.rds
 }
