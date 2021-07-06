@@ -1,7 +1,7 @@
 resource "aws_security_group" "efs_service" {
   # count       = length(var.efs_service_security_group_ids) == 0 ? 1 : 0
   count       = length(var.security_group_ids.efs) == 0 ? 1 : 0
-  name        = "wordpress-efs-service"
+  name        = "wordpress-efs-service_${var.name_modifier}"
   description = "wordpress-efs-service"
   vpc_id      = data.aws_subnet.ecs_service_subnet_ids.vpc_id
 }
@@ -22,7 +22,7 @@ resource "aws_security_group_rule" "efs_service_ingress_nfs_tcp" {
 resource "aws_security_group" "ecs_service" {
   # count       = length(var.ecs_service_security_group_ids) == 0 ? 1 : 0
   count       = length(var.security_group_ids.ecs) == 0 ? 1 : 0
-  name        = "wordpress-ecs-service"
+  name        = "wordpress-ecs-service_${var.name_modifier}"
   description = "wordpress ecs service"
   vpc_id      = data.aws_subnet.ecs_service_subnet_ids.vpc_id
 }
@@ -102,7 +102,7 @@ resource "aws_security_group_rule" "ecs_service_egress_efs_tcp" {
 resource "aws_security_group" "lb_service" {
   # count       = length(var.lb_security_group_ids) == 0 ? 1 : 0
   count       = length(var.security_group_ids.lb) == 0 ? 1 : 0
-  name        = "wordpress-lb-service"
+  name        = "wordpress-lb-service_${var.name_modifier}"
   description = "wordpress lb service"
   vpc_id      = data.aws_subnet.ecs_service_subnet_ids.vpc_id
 }
@@ -158,7 +158,7 @@ resource "aws_security_group_rule" "lb_service_egress_https" {
 resource "aws_security_group" "rds_cluster" {
   # count       = length(var.rds_cluster_security_group_ids) == 0 ? 1 : 0
   count       = length(var.security_group_ids.rds) == 0 ? 1 : 0
-  name        = "wordpress-rds-service"
+  name        = "wordpress-rds-service_${var.name_modifier}"
   description = "wordpress rds service"
   vpc_id      = data.aws_subnet.ecs_service_subnet_ids.vpc_id
 }
