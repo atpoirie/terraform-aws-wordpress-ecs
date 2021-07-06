@@ -12,12 +12,12 @@ resource "aws_kms_key" "wordpress" {
 }
 
 resource "aws_kms_alias" "wordpress" {
-  name          = "alias/wordpress"
+  name          = "alias/wordpress_${var.name_modifier}"
   target_key_id = aws_kms_key.wordpress.id
 }
 
 resource "aws_efs_file_system" "wordpress" {
-  creation_token = "wordpress"
+  creation_token = "wordpress_${var.name_modifier}"
   encrypted      = true
   kms_key_id     = aws_kms_key.wordpress.arn
   tags           = var.tags
@@ -192,7 +192,7 @@ resource "aws_lb_target_group" "wordpress_http" {
 
 resource "aws_db_subnet_group" "db" {
   count      = var.db_subnet_group_name == "" ? 1 : 0
-  name       = "wordpress_db_subnet_group"
+  name       = "wordpress_db_subnet_group_${var.name_modifier}"
   subnet_ids = var.db_subnet_group_subnet_ids
   tags       = var.tags
 }

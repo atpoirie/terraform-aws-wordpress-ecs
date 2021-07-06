@@ -32,12 +32,12 @@ data "aws_iam_policy_document" "ecs_task_policy" {
 }
 
 resource "aws_iam_role" "ecs_task_role" {
-  name               = "wordpressTaskRole"
+  name               = "wordpressTaskRole_${var.name_modifier}"
   assume_role_policy = data.aws_iam_policy_document.ecs_task_trust.json
 }
 
 resource "aws_iam_policy" "ecs_task_policy" {
-  name   = "wordpressTaskPolicy"
+  name   = "wordpressTaskPolicy_${var.name_modifier}"
   policy = data.aws_iam_policy_document.ecs_task_policy.json
 }
 

@@ -1,3 +1,9 @@
+variable "name_modifier" {
+  description = "add to end of otherwise repeated 'wordpress' names throughout infra"
+  type        = string
+  default     = ""
+}
+
 variable "ecs_cloudwatch_logs_group_name" {
   description = "Name of the Log Group where ECS logs should be written"
   type        = string
